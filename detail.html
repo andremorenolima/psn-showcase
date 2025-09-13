@@ -1,0 +1,128 @@
+<!-- detail.html: Página de detalhe de cada jogo -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalhes do Jogo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; color: #333; }
+    .container { max-width: 1920px; margin: 0 auto; padding: 2rem; }
+    .back { display: inline-block; margin-bottom: 1rem; color: #007acc; text-decoration: none; }
+    .header { display: flex; gap: 2rem; background: #fff; padding: 1rem; border-radius: 8px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+    .header img { width: 200px; height: auto; object-fit: cover; border-radius: 4px; }
+    .header-info { display: flex; flex-direction: column; justify-content: space-between; }
+    .header-info h1 { font-size: 1.5rem; margin-bottom: .5rem; }
+    .header-info .platform { font-size: 1rem; color: #666; margin-bottom: 1rem; }
+    .header-info .summary { display: flex; gap: 1rem; font-size: .9rem; margin-bottom: 1rem; }
+    .trophy-bronze { color: #cd7f32; }
+    .trophy-silver { color: #c0c0c0; }
+    .trophy-gold { color: #ffd700; }
+    .trophy-platinum { color: #e5e4e2; }
+    .progress-container { width: 100%; background: #ddd; border-radius: 8px;
+                         overflow: hidden; height: 16px; margin-bottom: 1rem; }
+    .progress-bar { height: 100%; background: #4caf50; width: 0%; transition: width .3s ease; }
+    .progress-text { text-align: right; font-size: .8rem; margin-top: -.9rem;
+                   margin-bottom: 1rem; color: #333; }
+    .trophy-list { width: 100%; border-collapse: collapse; }
+    .trophy-list th, .trophy-list td { padding: .75rem; border-bottom: 1px solid #ddd;
+                                     text-align: left; vertical-align: middle; }
+    .trophy-list th { background: #fafafa; }
+    .trophy-list img { width: 40px; height: 40px; object-fit: cover;
+                      border-radius: 4px; cursor: pointer; transition: transform .2s ease; }
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.7); display: none; align-items: center;
+                    justify-content: center; z-index: 1000; }
+    .modal-overlay.active { display: flex; }
+    .modal-content { max-width: 90%; max-height: 90%; }
+    .modal-content img { width: 100%; height: auto; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="back">← Voltar</a>
+    <div class="header">
+      <img id="detailImage" src="" alt="Capa do jogo">
+      <div class="header-info">
+        <h1 id="detailTitle"></h1>
+        <div class="platform" id="detailPlatform"></div>
+        <div class="summary">
+          <div class="trophy trophy-bronze">●<span id="sumBronze"></span></div>
+          <div class="trophy trophy-silver">●<span id="sumSilver"></span></div>
+          <div class="trophy trophy-gold">●<span id="sumGold"></span></div>
+          <div class="trophy trophy-platinum">●<span id="sumPlatinum"></span></div>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText"></div>
+      </div>
+    </div>
+    <table class="trophy-list">
+      <thead>
+        <tr>
+          <th></th><th>Nome</th><th>Descrição</th><th>Tipo</th>
+          <th>Raridade</th><th>Conquistado</th><th>Data</th><th>Taxa (%)</th>
+        </tr>
+      </thead>
+      <tbody id="trophyBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Modal para ampliar troféu -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <img src="" alt="Troféu ampliado" id="modalImage">
+    </div>
+  </div>
+
+  <script>
+    // Detalhe
+    const params = new URLSearchParams(location.search);
+    const idx = parseInt(params.get('game'),10);
+    fetch('games.json')
+      .then(r => r.json())
+      .then(games => {
+        const game = games[idx];
+        document.getElementById('detailImage').src = game.image;
+        document.getElementById('detailTitle').textContent = game.gameName;
+        document.getElementById('detailPlatform').textContent = 'Plataforma: ' + game.platform;
+        document.getElementById('sumBronze').textContent = game.trophyTypeCounts.bronze;
+        document.getElementById('sumSilver').textContent = game.trophyTypeCounts.silver;
+        document.getElementById('sumGold').textContent = game.trophyTypeCounts.gold;
+        document.getElementById('sumPlatinum').textContent = game.trophyTypeCounts.platinum;
+        const total = game.trophyList.length;
+        const earned = game.trophyList.filter(t=>t.isEarned).length;
+        const percent = Math.round((earned/total)*100);
+        document.getElementById('progressBar').style.width = percent+'%';
+        document.getElementById('progressText').textContent = `${earned} de ${total} troféus (${percent}%)`;
+        const tbody = document.getElementById('trophyBody');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalImage = document.getElementById('modalImage');
+        game.trophyList.forEach(t=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><img src="${t.trophyImg||''}" alt="${t.trophyName}" class="thumb"></td>
+            <td>${t.trophyName}</td><td>${t.trophyDetail}</td>
+            <td>${t.type}</td><td>${t.rarity}</td>
+            <td>${t.isEarned?'Sim':'Não'}</td>
+            <td>${t.isEarned?t.earnedOn:'--'}</td>
+            <td>${t.earnedRate.toFixed(1)}</td>
+          `;
+          tbody.appendChild(tr);
+          const img = tr.querySelector('img.thumb');
+          img.addEventListener('click', ()=>{
+            modalImage.src = img.src;
+            modalOverlay.classList.add('active');
+          });
+        });
+        modalOverlay.addEventListener('click',()=>{
+          modalOverlay.classList.remove('active');
+        });
+      })
+      .catch(e=>console.error('Erro ao carregar games.json',e));
+  </script>
+</body>
+</html>

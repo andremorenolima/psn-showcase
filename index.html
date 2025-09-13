@@ -1,0 +1,94 @@
+<!-- index.html: Home (grid de jogos) -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Meus Jogos PSN</title>
+  <style>
+    /* reset mínimo */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; color: #333; }
+    .container { max-width: 1920px; margin: 0 auto; padding: 2rem; }
+    h1 { text-align: center; margin-bottom: 1.5rem; }
+
+    /* Grid responsivo de cards */
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+    .game-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform .1s;
+    }
+    .game-card:hover { transform: translateY(-2px); }
+    .game-card img { width: 100%; height: 140px; object-fit: cover; }
+    .game-info {
+      padding: 1rem; flex: 1; display: flex;
+      flex-direction: column; justify-content: space-between;
+    }
+    .game-title { font-size: 1.1rem; margin-bottom: .5rem; }
+    .game-platform { font-size: .9rem; color: #666; margin-bottom: 1rem; }
+    .trophy-counts { display: flex; justify-content: space-between; font-size: .9rem; margin-bottom: .5rem; }
+    .trophy { display: flex; align-items: center; }
+    .trophy span { margin-left: .3rem; }
+    .trophy-bronze { color: #cd7f32; }
+    .trophy-silver { color: #c0c0c0; }
+    .trophy-gold { color: #ffd700; }
+    .trophy-platinum { color: #e5e4e2; }
+    .progress-container-small {
+      width: 100%; background: #ddd; border-radius: 4px;
+      overflow: hidden; height: 8px; margin-bottom: .5rem;
+    }
+    .progress-bar-small { height: 100%; background: #4caf50; width: 0%; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Meus Jogos PSN</h1>
+    <div class="game-grid" id="gameGrid"></div>
+  </div>
+
+  <script>
+    fetch('games.json')
+      .then(res => res.json())
+      .then(games => {
+        const grid = document.getElementById('gameGrid');
+        games.forEach((game, idx) => {
+          const card = document.createElement('div');
+          card.className = 'game-card';
+          card.onclick = () => location.href = `detail.html?game=${idx}`;
+          const total = game.trophyList.length;
+          const earned = game.trophyList.filter(t => t.isEarned).length;
+          const percent = total ? Math.round((earned/total)*100) : 0;
+          card.innerHTML = `
+            <img src="${game.image||''}" alt="${game.gameName}">
+            <div class="game-info">
+              <div>
+                <h2 class="game-title">${game.gameName}</h2>
+                <div class="game-platform">Plataforma: ${game.platform}</div>
+              </div>
+              <div class="trophy-counts">
+                <div class="trophy trophy-bronze">●<span>${game.trophyTypeCounts.bronze}</span></div>
+                <div class="trophy trophy-silver">●<span>${game.trophyTypeCounts.silver}</span></div>
+                <div class="trophy trophy-gold">●<span>${game.trophyTypeCounts.gold}</span></div>
+                <div class="trophy trophy-platinum">●<span>${game.trophyTypeCounts.platinum}</span></div>
+              </div>
+              <div class="progress-container-small">
+                <div class="progress-bar-small" style="width:${percent}%"></div>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      })
+      .catch(err => console.error('Erro ao carregar games.json', err));
+  </script>
+</body>
+</html>
