@@ -27,6 +27,16 @@ Este projeto foi criado para ser uma vitrine personalizada das minhas conquistas
 * **Pacote Principal:**
     * [psn-api](https://github.com/achievements-app/psn-api) (para interagir com a API da PlayStation Network)
 
+## 🧠 O que aprendi
+
+Este projeto foi uma excelente oportunidade para aprofundar meus conhecimentos em diversas áreas, conectando o back-end e o front-end de uma aplicação de forma prática.
+
+* **Automação com Node.js:** Criar scripts para tarefas de back-end, como o consumo de APIs de terceiros e a manipulação de dados em formato JSON.
+* **JavaScript Assíncrono:** Utilizar `async/await` de forma prática para lidar com as requisições à API da PSN, gerenciando o fluxo de dados de forma eficiente.
+* **Manipulação do DOM com JavaScript Puro:** Renderizar dinamicamente o conteúdo da página, criando elementos HTML a partir dos dados do JSON, sem o uso de frameworks.
+* **Consumo de Dados no Front-end:** Utilizar a `Fetch API` para carregar e processar o arquivo JSON local, disponibilizando os dados para a aplicação.
+* **Gerenciamento de Credenciais:** Proteger informações sensíveis, como tokens de API e IDs, utilizando variáveis de ambiente com um arquivo `.env`.
+
 ## 🚀 Como Executar o Projeto
 
 Siga os passos abaixo para configurar e rodar o projeto em sua máquina local.
